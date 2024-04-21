@@ -24,6 +24,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import type { BranchWithBase } from '../../modules/platform';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
@@ -588,10 +589,10 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits ?? /* istanbul ignore next */ {});
 }
 
-export async function isBranchBehindBase(
-  branchName: string,
-  baseBranch: string,
-): Promise<boolean> {
+export async function isBranchBehindBase({
+  branchName,
+  baseBranch,
+}: BranchWithBase): Promise<boolean> {
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branchName);
   let isBehind = getCachedBehindBaseResult(
@@ -628,10 +629,10 @@ export async function isBranchBehindBase(
   }
 }
 
-export async function isBranchModified(
-  branchName: string,
-  baseBranch: string,
-): Promise<boolean> {
+export async function isBranchModified({
+  branchName,
+  baseBranch,
+}: BranchWithBase): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
     return false;
@@ -718,24 +719,24 @@ export async function isBranchModified(
   return true;
 }
 
-export async function isBranchConflicted(
-  baseBranch: string,
-  branch: string,
-): Promise<boolean> {
-  logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
+export async function isBranchConflicted({
+  baseBranch,
+  branchName,
+}: BranchWithBase): Promise<boolean> {
+  logger.debug(`isBranchConflicted(${baseBranch}, ${branchName})`);
 
   const baseBranchSha = getBranchCommit(baseBranch);
-  const branchSha = getBranchCommit(branch);
+  const branchSha = getBranchCommit(branchName);
   if (!baseBranchSha || !branchSha) {
     logger.warn(
-      { baseBranch, branch },
+      { baseBranch, branch: branchName },
       'isBranchConflicted: branch does not exist',
     );
     return true;
   }
 
   const isConflicted = getCachedConflictResult(
-    branch,
+    branchName,
     branchSha,
     baseBranch,
     baseBranchSha,
@@ -760,13 +761,13 @@ export async function isBranchConflicted(
     if (origBranch !== baseBranch) {
       await git.checkout(baseBranch);
     }
-    await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
+    await git.merge(['--no-commit', '--no-ff', `origin/${branchName}`]);
   } catch (err) {
     result = true;
     // istanbul ignore if: not easily testable
     if (!err?.git?.conflicts?.length) {
       logger.debug(
-        { baseBranch, branch, err },
+        { baseBranch, branch: branchName, err },
         'isBranchConflicted: unknown error',
       );
     }
@@ -778,13 +779,13 @@ export async function isBranchConflicted(
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug(
-        { baseBranch, branch, err },
+        { baseBranch, branch: branchName, err },
         'isBranchConflicted: cleanup error',
       );
     }
   }
 
-  setCachedConflictResult(branch, result);
+  setCachedConflictResult(branchName, result);
   logger.debug(`branch.isConflicted(): ${result}`);
   return result;
 }

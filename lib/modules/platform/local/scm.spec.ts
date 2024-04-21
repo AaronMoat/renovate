@@ -17,15 +17,21 @@ describe('modules/platform/local/scm', () => {
 
   describe('dummy functions', () => {
     it('behindBaseBranch', async () => {
-      expect(await localFs.isBranchBehindBase('', '')).toBe(false);
+      expect(
+        await localFs.isBranchBehindBase({ baseBranch: '', branchName: '' }),
+      ).toBe(false);
     });
 
     it('isBranchModified', async () => {
-      expect(await localFs.isBranchModified('', '')).toBe(false);
+      expect(
+        await localFs.isBranchModified({ baseBranch: '', branchName: '' }),
+      ).toBe(false);
     });
 
     it('isBranchConflicted', async () => {
-      expect(await localFs.isBranchConflicted('', '')).toBe(false);
+      expect(
+        await localFs.isBranchConflicted({ branchName: '', baseBranch: '' }),
+      ).toBe(false);
     });
 
     it('branchExists', async () => {

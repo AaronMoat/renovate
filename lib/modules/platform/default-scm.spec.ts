@@ -33,19 +33,28 @@ describe('modules/platform/default-scm', () => {
 
   it('delegate isBranchBehindBase to util/git', async () => {
     git.isBranchBehindBase.mockResolvedValueOnce(true);
-    await defaultGitScm.isBranchBehindBase('abc', 'main');
+    await defaultGitScm.isBranchBehindBase({
+      branchName: 'abc',
+      baseBranch: 'main',
+    });
     expect(git.isBranchBehindBase).toHaveBeenCalledTimes(1);
   });
 
   it('delegate isBranchConflicted to util/git', async () => {
     git.isBranchConflicted.mockResolvedValueOnce(true);
-    await defaultGitScm.isBranchConflicted('main', 'abc');
+    await defaultGitScm.isBranchConflicted({
+      baseBranch: 'main',
+      branchName: 'abc',
+    });
     expect(git.isBranchConflicted).toHaveBeenCalledTimes(1);
   });
 
   it('delegate isBranchModified to util/git', async () => {
     git.isBranchModified.mockResolvedValueOnce(true);
-    await defaultGitScm.isBranchModified('branchName', 'main');
+    await defaultGitScm.isBranchModified({
+      branchName: 'branchName',
+      baseBranch: 'main',
+    });
     expect(git.isBranchModified).toHaveBeenCalledTimes(1);
   });
 

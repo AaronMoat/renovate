@@ -51,7 +51,7 @@ export async function checkAutoMerge(
   }
   const isConflicted =
     config.isConflicted ??
-    (await scm.isBranchConflicted(baseBranch, branchName));
+    (await scm.isBranchConflicted({ baseBranch, branchName }));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -82,7 +82,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'BranchNotGreen',
     };
   }
-  if (await scm.isBranchModified(branchName, baseBranch)) {
+  if (await scm.isBranchModified({ branchName, baseBranch })) {
     logger.debug('PR is ready for automerge but has been modified');
     return {
       automerged: false,

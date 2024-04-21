@@ -25,10 +25,10 @@ async function cleanUpBranches(
         state: 'open',
         targetBranch: config.baseBranch,
       });
-      const branchIsModified = await scm.isBranchModified(
+      const branchIsModified = await scm.isBranchModified({
         branchName,
-        config.defaultBranch!,
-      );
+        baseBranch: config.defaultBranch!,
+      });
       if (pr) {
         if (branchIsModified) {
           logger.debug(

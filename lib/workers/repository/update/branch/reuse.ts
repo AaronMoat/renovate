@@ -50,10 +50,10 @@ export async function shouldReuseExistingBranch(
       (config.automerge === true ||
         (await platform.getBranchForceRebase?.(config.baseBranch))))
   ) {
-    if (await scm.isBranchBehindBase(branchName, baseBranch)) {
+    if (await scm.isBranchBehindBase({ branchName, baseBranch })) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (await scm.isBranchModified(branchName, baseBranch)) {
+      if (await scm.isBranchModified({ branchName, baseBranch })) {
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
@@ -70,11 +70,14 @@ export async function shouldReuseExistingBranch(
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  result.isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
+  result.isConflicted = await scm.isBranchConflicted({
+    baseBranch,
+    branchName,
+  });
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
-    if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
+    if ((await scm.isBranchModified({ branchName, baseBranch })) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (
         config.rebaseWhen === 'never' &&

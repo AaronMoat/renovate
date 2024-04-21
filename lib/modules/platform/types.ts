@@ -268,10 +268,15 @@ export interface Platform {
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 }
 
+export interface BranchWithBase {
+  branchName: string;
+  baseBranch: string;
+}
+
 export interface PlatformScm {
-  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchModified(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
+  isBranchBehindBase(config: BranchWithBase): Promise<boolean>;
+  isBranchModified(config: BranchWithBase): Promise<boolean>;
+  isBranchConflicted(config: BranchWithBase): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;

@@ -4,6 +4,7 @@ import * as git from '../../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import { hash } from '../../../util/hash';
 import { DefaultGitScm } from '../default-scm';
+import type { BranchWithBase } from '../types';
 import { client } from './client';
 import type { GerritFindPRConfig } from './types';
 
@@ -39,10 +40,10 @@ export class GerritScm extends DefaultGitScm {
     return git.getBranchCommit(branchName);
   }
 
-  override async isBranchBehindBase(
-    branchName: string,
-    baseBranch: string,
-  ): Promise<boolean> {
+  override async isBranchBehindBase({
+    branchName,
+    baseBranch,
+  }: BranchWithBase): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
       branchName,
@@ -58,13 +59,13 @@ export class GerritScm extends DefaultGitScm {
     return true;
   }
 
-  override async isBranchConflicted(
-    baseBranch: string,
-    branch: string,
-  ): Promise<boolean> {
+  override async isBranchConflicted({
+    baseBranch,
+    branchName,
+  }: BranchWithBase): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
-      branchName: branch,
+      branchName,
       targetBranch: baseBranch,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -73,13 +74,15 @@ export class GerritScm extends DefaultGitScm {
       return !mergeInfo.mergeable;
     } else {
       logger.warn(
-        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`,
+        `There is no open change with branch=${branchName} and baseBranch=${baseBranch}`,
       );
       return true;
     }
   }
 
-  override async isBranchModified(branchName: string): Promise<boolean> {
+  override async isBranchModified({
+    branchName,
+  }: BranchWithBase): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
       .findChanges(repository, searchConfig, true)

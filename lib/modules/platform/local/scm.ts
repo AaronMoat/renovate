@@ -2,17 +2,17 @@ import { execSync } from 'node:child_process';
 import { glob } from 'glob';
 import { logger } from '../../../logger';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import type { PlatformScm } from '../types';
+import type { BranchWithBase, PlatformScm } from '../types';
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {
-  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean> {
+  isBranchBehindBase(config: BranchWithBase): Promise<boolean> {
     return Promise.resolve(false);
   }
-  isBranchModified(branchName: string, baseBranch: string): Promise<boolean> {
+  isBranchModified(config: BranchWithBase): Promise<boolean> {
     return Promise.resolve(false);
   }
-  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean> {
+  isBranchConflicted(config: BranchWithBase): Promise<boolean> {
     return Promise.resolve(false);
   }
   branchExists(branchName: string): Promise<boolean> {

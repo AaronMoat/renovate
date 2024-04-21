@@ -307,23 +307,39 @@ describe('util/git/index', () => {
   describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
       expect(
-        await git.isBranchBehindBase('renovate/future_branch', defaultBranch),
+        await git.isBranchBehindBase({
+          branchName: 'renovate/future_branch',
+          baseBranch: defaultBranch,
+        }),
       ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
       expect(
-        await git.isBranchBehindBase('renovate/past_branch', defaultBranch),
+        await git.isBranchBehindBase({
+          branchName: 'renovate/past_branch',
+          baseBranch: defaultBranch,
+        }),
       ).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      expect(
+        await git.isBranchBehindBase({
+          branchName: 'develop',
+          baseBranch: defaultBranch,
+        }),
+      ).toBeTrue();
     });
 
     it('returns cached value', async () => {
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
-      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      expect(
+        await git.isBranchBehindBase({
+          branchName: 'develop',
+          baseBranch: defaultBranch,
+        }),
+      ).toBeTrue();
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'branch.isBehindBase(): using cached result "true"',
       );
@@ -337,16 +353,25 @@ describe('util/git/index', () => {
 
     it('should return false when branch is not found', async () => {
       expect(
-        await git.isBranchModified('renovate/not_found', defaultBranch),
+        await git.isBranchModified({
+          branchName: 'renovate/not_found',
+          baseBranch: defaultBranch,
+        }),
       ).toBeFalse();
     });
 
     it('should return false when author matches', async () => {
       expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
+        await git.isBranchModified({
+          branchName: 'renovate/future_branch',
+          baseBranch: defaultBranch,
+        }),
       ).toBeFalse();
       expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
+        await git.isBranchModified({
+          branchName: 'renovate/future_branch',
+          baseBranch: defaultBranch,
+        }),
       ).toBeFalse();
     });
 
@@ -355,7 +380,10 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['custom@example.com'],
       });
       expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
+        await git.isBranchModified({
+          branchName: 'renovate/custom_author',
+          baseBranch: defaultBranch,
+        }),
       ).toBeFalse();
     });
 
@@ -364,10 +392,10 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com'],
       });
       expect(
-        await git.isBranchModified(
-          'renovate/branch_with_multiple_authors',
-          defaultBranch,
-        ),
+        await git.isBranchModified({
+          branchName: 'renovate/branch_with_multiple_authors',
+          baseBranch: defaultBranch,
+        }),
       ).toBeTrue();
     });
 
@@ -376,23 +404,29 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
       });
       expect(
-        await git.isBranchModified(
-          'renovate/branch_with_multiple_authors',
-          defaultBranch,
-        ),
+        await git.isBranchModified({
+          branchName: 'renovate/branch_with_multiple_authors',
+          baseBranch: defaultBranch,
+        }),
       ).toBeFalse();
     });
 
     it('should return true when custom author is unknown', async () => {
       expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
+        await git.isBranchModified({
+          branchName: 'renovate/custom_author',
+          baseBranch: defaultBranch,
+        }),
       ).toBeTrue();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
       expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
+        await git.isBranchModified({
+          branchName: 'renovate/future_branch',
+          baseBranch: defaultBranch,
+        }),
       ).toBeTrue();
     });
   });
@@ -942,18 +976,18 @@ describe('util/git/index', () => {
     });
 
     it('returns true for non-existing source branch', async () => {
-      const res = await git.isBranchConflicted(
-        defaultBranch,
-        'renovate/non_existing_branch',
-      );
+      const res = await git.isBranchConflicted({
+        baseBranch: defaultBranch,
+        branchName: 'renovate/non_existing_branch',
+      });
       expect(res).toBeTrue();
     });
 
     it('returns true for non-existing target branch', async () => {
-      const res = await git.isBranchConflicted(
-        'renovate/non_existing_branch',
-        'renovate/non_conflicted_branch',
-      );
+      const res = await git.isBranchConflicted({
+        baseBranch: 'renovate/non_existing_branch',
+        branchName: 'renovate/non_conflicted_branch',
+      });
       expect(res).toBeTrue();
     });
 
@@ -961,10 +995,10 @@ describe('util/git/index', () => {
       const branchBefore = 'renovate/non_conflicted_branch';
       await git.checkoutBranch(branchBefore);
 
-      const res = await git.isBranchConflicted(
-        defaultBranch,
-        'renovate/conflicted_branch',
-      );
+      const res = await git.isBranchConflicted({
+        baseBranch: defaultBranch,
+        branchName: 'renovate/conflicted_branch',
+      });
 
       expect(res).toBeTrue();
 
@@ -977,10 +1011,10 @@ describe('util/git/index', () => {
       const branchBefore = 'renovate/conflicted_branch';
       await git.checkoutBranch(branchBefore);
 
-      const res = await git.isBranchConflicted(
-        defaultBranch,
-        'renovate/non_conflicted_branch',
-      );
+      const res = await git.isBranchConflicted({
+        baseBranch: defaultBranch,
+        branchName: 'renovate/non_conflicted_branch',
+      });
 
       expect(res).toBeFalse();
 
@@ -993,10 +1027,10 @@ describe('util/git/index', () => {
       it('returns cached values', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(true);
 
-        const res = await git.isBranchConflicted(
-          defaultBranch,
-          'renovate/conflicted_branch',
-        );
+        const res = await git.isBranchConflicted({
+          baseBranch: defaultBranch,
+          branchName: 'renovate/conflicted_branch',
+        });
 
         expect(res).toBeTrue();
         expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
@@ -1013,10 +1047,10 @@ describe('util/git/index', () => {
       it('caches truthy return value', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(null);
 
-        const res = await git.isBranchConflicted(
-          defaultBranch,
-          'renovate/conflicted_branch',
-        );
+        const res = await git.isBranchConflicted({
+          baseBranch: defaultBranch,
+          branchName: 'renovate/conflicted_branch',
+        });
 
         expect(res).toBeTrue();
         expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
@@ -1027,10 +1061,10 @@ describe('util/git/index', () => {
       it('caches falsy return value', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(null);
 
-        const res = await git.isBranchConflicted(
-          defaultBranch,
-          'renovate/non_conflicted_branch',
-        );
+        const res = await git.isBranchConflicted({
+          baseBranch: defaultBranch,
+          branchName: 'renovate/non_conflicted_branch',
+        });
 
         expect(res).toBeFalse();
         expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([

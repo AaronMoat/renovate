@@ -243,10 +243,10 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(
-        config.branchName,
-        config.baseBranch,
-      );
+      const branchIsModified = await scm.isBranchModified({
+        branchName: config.branchName,
+        baseBranch: config.baseBranch,
+      });
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -551,7 +551,10 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
+        (await scm.isBranchConflicted({
+          baseBranch: config.baseBranch,
+          branchName: config.branchName,
+        }));
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs

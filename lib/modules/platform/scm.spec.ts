@@ -31,7 +31,7 @@ describe('modules/platform/scm', () => {
     async (platform: PlatformId) => {
       git.isBranchBehindBase.mockResolvedValueOnce(true);
       setPlatformScmApi(platform);
-      await scm.isBranchBehindBase('abc', 'main');
+      await scm.isBranchBehindBase({ branchName: 'abc', baseBranch: 'main' });
       expect(git.isBranchBehindBase).toHaveBeenCalledTimes(1);
     },
   );

@@ -1,6 +1,6 @@
 import * as git from '../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import type { PlatformScm } from './types';
+import type { BranchWithBase, PlatformScm } from './types';
 
 export class DefaultGitScm implements PlatformScm {
   branchExists(branchName: string): Promise<boolean> {
@@ -21,16 +21,19 @@ export class DefaultGitScm implements PlatformScm {
     return Promise.resolve(git.getBranchCommit(branchName));
   }
 
-  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean> {
-    return git.isBranchBehindBase(branchName, baseBranch);
+  isBranchBehindBase(config: BranchWithBase): Promise<boolean> {
+    return git.isBranchBehindBase(config);
   }
 
-  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean> {
-    return git.isBranchConflicted(baseBranch, branch);
+  isBranchConflicted(config: BranchWithBase): Promise<boolean> {
+    return git.isBranchConflicted(config);
   }
 
-  isBranchModified(branchName: string, baseBranch: string): Promise<boolean> {
-    return git.isBranchModified(branchName, baseBranch);
+  isBranchModified({
+    branchName,
+    baseBranch,
+  }: BranchWithBase): Promise<boolean> {
+    return git.isBranchModified({ branchName, baseBranch });
   }
 
   getFileList(): Promise<string[]> {
